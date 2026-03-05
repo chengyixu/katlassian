@@ -19,14 +19,14 @@ var rootCmd = &cobra.Command{
 }
 
 func getClient() *api.Client {
-	token, err := auth.GetToken()
+	httpClient, err := auth.GetHTTPClient()
 	if err != nil {
 		output.Error(err.Error())
 		os.Exit(1)
 	}
 	serverURL := auth.GetServerURL()
 
-	client, err := api.NewClient(token, serverURL)
+	client, err := api.NewClient(httpClient, serverURL)
 	if err != nil {
 		output.Error(err.Error())
 		os.Exit(1)

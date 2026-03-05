@@ -11,7 +11,6 @@ import (
 const oauthBaseURL = "https://api.atlassian.com"
 
 type Client struct {
-	token      string
 	serverURL  string
 	cloudID    string
 	httpClient *http.Client
@@ -25,11 +24,11 @@ type AccessibleResource struct {
 	AvatarURL string   `json:"avatarUrl"`
 }
 
-func NewClient(token string, serverURL string) (*Client, error) {
+// NewClient creates an API client using the provided http.Client (which handles auth).
+func NewClient(httpClient *http.Client, serverURL string) (*Client, error) {
 	c := &Client{
-		token:      token,
 		serverURL:  serverURL,
-		httpClient: &http.Client{},
+		httpClient: httpClient,
 	}
 
 	// For OAuth tokens, discover the cloud ID
@@ -61,7 +60,7 @@ func (c *Client) getAccessibleResources() ([]AccessibleResource, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Authorization", "Bearer "+c.token)
+	// Authorization header injected by oauth2 transport
 	req.Header.Set("Accept", "application/json")
 
 	resp, err := c.httpClient.Do(req)
@@ -96,7 +95,7 @@ func (c *Client) Get(path string) (json.RawMessage, error) {
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
-	req.Header.Set("Authorization", "Bearer "+c.token)
+	// Authorization header injected by oauth2 transport
 	req.Header.Set("Accept", "application/json")
 
 	resp, err := c.httpClient.Do(req)
@@ -127,7 +126,7 @@ func (c *Client) Post(path string, payload interface{}) (json.RawMessage, error)
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
-	req.Header.Set("Authorization", "Bearer "+c.token)
+	// Authorization header injected by oauth2 transport
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
@@ -159,7 +158,7 @@ func (c *Client) Put(path string, payload interface{}) (json.RawMessage, error) 
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
-	req.Header.Set("Authorization", "Bearer "+c.token)
+	// Authorization header injected by oauth2 transport
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
